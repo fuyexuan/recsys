@@ -3,7 +3,8 @@ from recsys.datatypes import QualityAssessmentInput
 from recsys.quality_valuation import QualityAssessment
 import pandas as pd
 import os
-import random
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 def get_intput(file_list):
     # 读取数据概括信息
@@ -90,7 +91,7 @@ def get_intput(file_list):
 if __name__ == "__main__":
     file_list = ["C:/Users/17235/Desktop/fyx/LLM-Trade/recsys_linux/0102测试结果/万得-wind/不应拒答+wind+问答记录.xlsx",
                  "C:/Users/17235/Desktop/fyx/LLM-Trade/recsys_linux/0102测试结果/大智慧-xiaohui/不应拒答+xiaohui+问答记录.xlsx",
-                 "C:/Users/17235/Desktop/fyx/LLM-Trade/recsys_linux/0102测试结果/大智慧-xiaohui/公正歧视+xiaohui+问答记录.xlsx",
+                 "C:/Users/17235/Desktop/fyx/LLM-Trade/recsys_linux/0102测试结果/密度-midu/不应拒答+midu+问答记录.xlsx",
                  ]
 
     quality_assessment_input = get_intput(file_list)
@@ -103,3 +104,48 @@ if __name__ == "__main__":
     print("Top 10 Difficulties:", quality_assessment_output.top_k_diff)
     print("Predicted Difficulties with text:", quality_assessment_output.combined_difficulty_scores_with_text)
     print("Top 10 Difficulties with text:", quality_assessment_output.top_k_diff_with_text)
+
+    # 创建 DataFrame
+    df1 = pd.DataFrame(quality_assessment_output.combined_difficulty_scores_with_text, columns=['题号', '难度', '题目内容'])
+
+    # 存储到 Excel 文件
+    df1.to_excel('output.xlsx', index=False)
+
+
+    file_list2 = ["C:/Users/17235/Desktop/fyx/LLM-Trade/recsys_linux/0102测试结果/万得-wind/公正歧视+wind+问答记录.xlsx",
+                 "C:/Users/17235/Desktop/fyx/LLM-Trade/recsys_linux/0102测试结果/大智慧-xiaohui/公正歧视+xiaohui+问答记录.xlsx",
+                 "C:/Users/17235/Desktop/fyx/LLM-Trade/recsys_linux/0102测试结果/密度-midu/公正歧视+midu+问答记录.xlsx",
+                 ]
+
+    quality_assessment_input2 = get_intput(file_list2)
+
+    quality_assessment_model2 = QualityAssessment(quality_assessment_input2)
+
+    quality_assessment_output2 = quality_assessment_model2.run()
+
+    # 创建 DataFrame
+    df2 = pd.DataFrame(quality_assessment_output2.combined_difficulty_scores_with_text, columns=['题号', '难度', '题目内容'])
+
+    plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
+    plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
+
+    # 添加一个 '来源' 列标识是哪个 DataFrame 的数据
+    df1['来源'] = '不应拒答'  # 'df1'
+    df2['来源'] = '公正歧视'  # 'df2'
+
+    # 合并两个 DataFrame
+    df_combined = pd.concat([df1, df2])
+
+    # 设置图形大小
+    plt.figure(figsize=(12, 8))
+
+    # 使用 catplot 创建并列箱型图
+    sns.boxplot(x="来源", y="难度", data=df_combined, width=0.4, palette={"不应拒答": "skyblue", "公正歧视": "lightcoral"})
+
+    # 设置图形标签
+    plt.xlabel("数据来源")
+    plt.ylabel("难度")
+    plt.title("题库结果的难度分布对比")
+
+    # 展示图形
+    plt.show()

@@ -3,6 +3,8 @@ from recsys.quality_valuation import QualityAssessment
 
 import random
 
+import pandas as pd
+
 # 随机初始化样例
 
 num_subjects = 10
@@ -34,5 +36,13 @@ print("Top 10 Difficulties:", quality_assessment_output.top_k_diff)
 print("Predicted Difficulties with text:", quality_assessment_output.combined_difficulty_scores_with_text)
 print("Top 10 Difficulties with text:", quality_assessment_output.top_k_diff_with_text)
 
+sorted_data = sorted(quality_assessment_output.combined_difficulty_scores_with_text, key=lambda x: x[0])
+print("Predicted Difficulties with text:", sorted_data)
 
+
+# 创建 DataFrame
+df = pd.DataFrame(quality_assessment_output.combined_difficulty_scores_with_text, columns=['题号', '难度', '题目内容'])
+
+# 存储到 Excel 文件
+df.to_excel('output.xlsx', index=False)
 
